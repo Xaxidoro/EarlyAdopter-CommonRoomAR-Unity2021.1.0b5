@@ -56,6 +56,8 @@ public class PhotonAgoraClientRoleView : MonoBehaviour, IPunObservable
 
         if (stream.isWriting == true)
         {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(gameObject.name);
+            stream.SendNext(bytes);
             if (gameObject.tag == "crAudience")
                 stream.SendNext(Convert.ToByte(0));
             else if (gameObject.tag == "crBroadcaster")
@@ -68,6 +70,9 @@ public class PhotonAgoraClientRoleView : MonoBehaviour, IPunObservable
                 FirstPacketReceived = true;    
             } else
             {
+                string name = System.Text.Encoding.UTF8.GetString((byte[])stream.ReceiveNext());
+                gameObject.name = name;
+
                 byte b = (byte)stream.ReceiveNext();
                 if (b == 0)
                     gameObject.tag = "crAudience";

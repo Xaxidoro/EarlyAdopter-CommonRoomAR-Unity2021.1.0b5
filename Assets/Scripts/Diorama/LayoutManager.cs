@@ -25,7 +25,6 @@ public class LayoutManager : MonoBehaviour
     [Header("Mute Images")]
     public GameObject m_NotMuteImg;
     public GameObject m_MuteImg;
-    public GameObject m_ClientRole;
 
     //Tells Agora I want to register my username
     public void Register()
@@ -52,15 +51,7 @@ public class LayoutManager : MonoBehaviour
     //Gets called by Agora Interface when a new user joins the channel
     public void AddNewUserElement(string go_name, string user_name)
     {
-        //GameObject clientRole = PhotonNetwork.Instantiate("ClientRole", Vector3.zero, Quaternion.identity, 0);
-        //PhotonView pv = PhotonView.Get(clientRole);
-        //if (pv.isMine)
-        //{
-        //    pv.RPC("SetClientRoleTag", PhotonTargets.AllBuffered, agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
-        //    pv.RequestOwnership();
-        //} else
-        //    clientRole.GetComponent<PhotonAgoraClientRoleView>().SetClientRoleTag(agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
-        //m_ClientRole = clientRole;
+        PhotonManager.instance.ClientRoleSanityCheck();
 
         GameObject go = Instantiate(m_UserElementPrefab);
         go.name = go_name;
@@ -80,7 +71,8 @@ public class LayoutManager : MonoBehaviour
             pv.RPC("SetClientRoleTag", PhotonTargets.AllBuffered, agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
         else
             clientRole.GetComponent<PhotonAgoraClientRoleView>().SetClientRoleTag(agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
-        m_ClientRole = clientRole;
+        PhotonManager.m_ClientRole = clientRole;
+        PhotonManager.m_ClientRole.name = user_name;
 
         GameObject go = Instantiate(m_UserElementPrefab);
         go.name = go_name;
@@ -169,8 +161,8 @@ public class LayoutManager : MonoBehaviour
 
         if (m_EndCallImg.activeSelf == true)
         {
-            if (m_ClientRole != null)
-                PhotonNetwork.Destroy(m_ClientRole);
+            if (PhotonManager.m_ClientRole != null)
+                PhotonNetwork.Destroy(PhotonManager.m_ClientRole);
             AgoraInterface.LeaveRoom();
             m_StartCallImg.SetActive(true);
             m_EndCallImg.SetActive(false);
@@ -221,11 +213,11 @@ public class LayoutManager : MonoBehaviour
         m_MuteImg.SetActive(value);
         m_agoraInterface.ControlMute(value);
         m_agoraInterface.r_Muted = value;
-        if (m_ClientRole != null)
+        if (PhotonManager.m_ClientRole != null)
             if (value)
-                m_ClientRole.tag = "crAudience";
+                PhotonManager.m_ClientRole.tag = "crAudience";
             else
-                m_ClientRole.tag = "crBroadcaster";
+                PhotonManager.m_ClientRole.tag = "crBroadcaster";
         if (value)
             m_agoraInterface.SetClientRole(agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
         else
@@ -254,8 +246,8 @@ public class LayoutManager : MonoBehaviour
             m_MuteImg.SetActive(true);
             m_agoraInterface.ControlMute(true);
             m_agoraInterface.r_Muted = true;
-            if (m_ClientRole != null)
-                m_ClientRole.tag = "crAudience";
+            if (PhotonManager.m_ClientRole != null)
+                PhotonManager.m_ClientRole.tag = "crAudience";
             m_agoraInterface.SetClientRole(agora_gaming_rtc.CLIENT_ROLE.AUDIENCE);
 
             GameObject[] gs = GameObject.FindGameObjectsWithTag("VideoInTriangle");
@@ -272,8 +264,8 @@ public class LayoutManager : MonoBehaviour
             m_MuteImg.SetActive(false);
             m_agoraInterface.ControlMute(false);
             m_agoraInterface.r_Muted = false;
-            if (m_ClientRole != null)
-                m_ClientRole.tag = "crBroadcaster";
+            if (PhotonManager.m_ClientRole != null)
+                PhotonManager.m_ClientRole.tag = "crBroadcaster";
             m_agoraInterface.SetClientRole(agora_gaming_rtc.CLIENT_ROLE.BROADCASTER);
         }
     }
